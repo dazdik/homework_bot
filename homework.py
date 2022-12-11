@@ -129,8 +129,7 @@ def check_response(response: dict) -> list:
         logger.error('Данные current_date получены не в виде целого числа')
         raise TypeError('Данные current_date получены не в виде целого числа')
 
-    homework = homeworks[0]
-    return homework
+    return homeworks
 
 
 def parse_status(homework: dict) -> str:
@@ -168,7 +167,7 @@ def main():
             response = get_api_answer(timestamp)
             homework = check_response(response)
             if homework:
-                message = parse_status(homework)
+                message = parse_status(homework[0])
             else:
                 logger.debug('Статус домашней работы не поменялся')
                 message = 'Нет обновлений'
