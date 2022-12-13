@@ -10,7 +10,7 @@ import telegram
 from dotenv import load_dotenv
 from telegram import TelegramError
 
-from exceptions import ErrorHomeWork, RequestApiError, TelegramMessageError
+from exceptions import ErrorHomeWork, RequestApiError
 
 load_dotenv()
 
@@ -65,9 +65,8 @@ def send_message(bot: telegram.Bot, message: str) -> bool:
         logger.debug('Сообщение успешно отправлено')
 
     except TelegramError as e:
-        # logger.error(e)
-        raise e('при отправке сообщения из'
-                'бота возникает ошибка: {e}')
+        logger.error(e)
+        # raise e('при отправке сообщения из бота возникает ошибка: {e}')
 
 
 def get_api_answer(timestamp: int) -> dict:
