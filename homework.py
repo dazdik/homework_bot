@@ -59,6 +59,7 @@ def check_tokens() -> bool:
 
 def send_message(bot: telegram.Bot, message: str) -> bool:
     """Функция send_message отправляет сообщение в Telegram чат."""
+    logger.info('Попытка отправки сообщения')
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.debug('Сообщение успешно отправлено')
@@ -84,7 +85,6 @@ def get_api_answer(timestamp: int) -> dict:
     try:
         response = requests.get(**arguments)
         if response.status_code != HTTPStatus.OK:
-            logger.error('Эндопоинт недоступен!')
             message = (
                 f'Получен {response.status_code} код ответа сервера: '
                 f'{response.reason}'
@@ -107,7 +107,6 @@ def check_response(response: dict) -> list:
     Проверяет ответ API на соответствие документации.
     """
     if not isinstance(response, dict):
-        logger.error('В ответе должен быть словарь!')
         raise TypeError('Требуемый тип данных — словарь.')
 
     try:
@@ -116,17 +115,14 @@ def check_response(response: dict) -> list:
         raise e('Ключ homeworks отсутствует')
 
     if 'current_date' not in response:
-        logger.error('Ключ current_date отсутствует')
         raise KeyError('Ключ current_date отсутствует')
 
     if not isinstance(homeworks, list):
-        logger.error('homeworks должен быть представлен в виде списка')
         raise TypeError('Список ДЗ должен быть представлен в виде списка')
 
     current_date = response['current_date']
 
     if not isinstance(current_date, int):
-        logger.error('Данные current_date получены не в виде целого числа')
         raise TypeError('Данные current_date получены не в виде целого числа')
 
     return homeworks
@@ -137,7 +133,7 @@ def parse_status(homework: dict) -> str:
     Функция parse_status.
     Извлекает из информации о конкретной домашней работе статус этой работы.
     """
-    keys = ('homework_name', 'status',)
+    keys = ('homework_name', 'status')
     for k in keys:
         if k not in homework:
             raise KeyError(f'{homework} не содержит {k}')
@@ -146,7 +142,6 @@ def parse_status(homework: dict) -> str:
     homework_status = homework['status']
 
     if homework_status not in HOMEWORK_VERDICTS:
-        logger.error('Неверный ключ для статуса ДЗ')
         raise ErrorHomeWork('Неверный ключ для статуса ДЗ')
 
     verdict = HOMEWORK_VERDICTS[homework_status]
@@ -172,6 +167,7 @@ def main():
                 logger.debug('Статус домашней работы не поменялся')
                 message = 'Нет обновлений'
             if message != old_message:
+                logger.debug('Бот отправил новое сообщение')
                 send_message(bot, message)
                 old_message = message
                 timestamp = response.get('current_date')
